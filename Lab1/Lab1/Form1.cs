@@ -6,7 +6,9 @@ namespace Lab1
         public int[,] matrix = new int[n, n];
         public int numberLeft;
         public int numberRight;
-        
+        public long maxDown;
+        public long maxUp;
+
         public Form1()
         {
             InitializeComponent();
@@ -15,8 +17,14 @@ namespace Lab1
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            // Создание ячеек 5 на 5 в dataGridView
-            dataGridView1.ColumnCount = n;
+            Clear();
+        }
+
+        private void Clear()
+        {
+            dataGridView1.Rows.Clear();
+            dataGridView1.Columns.Clear();
+            dataGridView1.ColumnCount = n; // Создание ячеек 5 на 5 в dataGridView
             dataGridView1.RowCount = n;
             label4.Text = "";
             label5.Text = "";
@@ -27,6 +35,7 @@ namespace Lab1
         {
             try
             {
+                Clear();
                 if (textBox1.Text == "" || textBox2.Text == "") // Проверка на заполненность границ
                 {
                     MessageBox.Show("Введите c какого и до какого числа будет сгенерирована матрица!", "Ошибка");
@@ -61,10 +70,14 @@ namespace Lab1
 
         private void button2_Click(object sender, EventArgs e)
         {
+            label4.Text = "";
+            label5.Text = "";
             try
             {
                 for (int i = 0; i < n; ++i)
                 {
+                    maxUp = -999999999999999999;
+                    maxDown = - 999999999999999999;
                     for (int j = 0; j < n; ++j)
                     {
                         if (dataGridView1.Rows[i].Cells[j].Value == null) // Проверка, есть ли числа в dataGridView
@@ -75,23 +88,12 @@ namespace Lab1
 
                         if (!int.TryParse(dataGridView1.Rows[i].Cells[j].Value.ToString(), out matrix[i, j])) // Проверка, есть ли
                         {
-                            MessageBox.Show("Где-то есть дробные числа в матрице!", "Ошибка");
+                            MessageBox.Show("Где-то есть буквы или дробные числа в матрице!", "Ошибка");
                             return;
                         }
-
-                        //if (Convert.ToDouble(dataGridView1.Rows[i].Cells[j].Value) < 0.000000000000001)
-                        //{
-                        //    MessageBox.Show("Где-то есть 0 или отрицательное число.", "Ошибка");
-                        //    return;
-                        //}
                     }
                 }
-                //  Дана целочисленная квадратная матрица порядка 5.
-                //  Найдите максимальный элемент среди элементов, лежащих
-                //  ниже главной диагонали, и максимальный элемент среди
-                //  элементов, лежащих выше главной диагонали, поменяйте их местами.
-                long maxDown = -999999999999999999;
-                long maxUp = -999999999999999999;
+                
                 for (int i = 0; i < n; ++i)
                 {
                     for (int j = 0; j < n; ++j)
@@ -99,34 +101,41 @@ namespace Lab1
                         if (j < i && matrix[i, j] > maxDown) // Нижняя диагональ
                         {
                             maxDown = matrix[i, j];
-                            matrix[i, j] = 1;
                         }
                         if (j > i && matrix[i, j] > maxUp) // Верхняя диагональ
                         {
                             maxUp = matrix[i, j];
                         }
-                        long temp;
-                        temp = maxDown;
-                        maxDown = maxUp;
-                        maxUp = temp;
-                        dataGridView1.Rows[i].Cells[j].Value = matrix[i, j];
                     }
-
                 }
 
                 label4.Text = Convert.ToString(maxDown);
                 label5.Text = Convert.ToString(maxUp);
+
+                for (int i = 0; i < n; ++i)
+                {
+                    for (int j = 0; j < n; ++j)
+                    {
+                        // Если на нижней диагонале есть максимальное число из верхней - заменяем 
+                        if (j < i && (Convert.ToInt32(dataGridView1.Rows[i].Cells[j].Value) == maxDown))
+                        {
+                            dataGridView1.Rows[i].Cells[j].Value = maxUp;
+                            dataGridView1.Rows[i].Cells[j].Style.BackColor = Color.Yellow;
+                        }
+                        // Если на верхней диагонале есть максимальное число из нижней - заменяем 
+                        if (j > i && (Convert.ToInt32(dataGridView1.Rows[i].Cells[j].Value) == maxUp))
+                        {
+                            dataGridView1.Rows[i].Cells[j].Value = maxDown;
+                            dataGridView1.Rows[i].Cells[j].Style.BackColor = Color.Yellow;
+                        }
+                    }
+                }
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message);
                 return;
             }
-        }
-
-        private void button3_Click(object sender, EventArgs e)
-        {
-
         }
     }
 }
